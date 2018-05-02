@@ -18,7 +18,7 @@ sylvan_init_package(1LL<<20,1LL<<25,1LL<<20,1LL<<25);
 sylvan_init_bdd();
 
 
-BDD a = sylvan_and(sylvan_nithvar(1), sylvan_ithvar(2));
+//BDD a = sylvan_and(sylvan_nithvar(1), sylvan_ithvar(2));
 
 
 
@@ -27,7 +27,7 @@ int i = 0;
 char b[256];
 snprintf(b, 256, "/tmp/sylvan/BDD-%d.dot", i);
 FILE *f = fopen(b, "w+");
-sylvan_fprintdot(f,a);
+//sylvan_fprintdot(f,a);
 fclose(f);
 
 
