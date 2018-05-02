@@ -1,0 +1,1 @@
+/usr/bin/cc -O2 -Wextra -Wall -Werror -fno-strict-aliasing  -O3 -DNDEBUG  -rdynamic CMakeFiles/test_basic.dir/test_basic.c.o  -o test_basic -Wl,-rpath,/home/hans/sylvan-1.2.0/build/src ../src/libsylvan.so -lm -lpthread -lgmp -lhwloc -lrt 
