@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <float.h>
 #include <sylvan.h>
+#include <stdarg.h>
 
 uint32_t c_var = 100;
 uint32_t cp_var = 101;
@@ -48,10 +49,23 @@ BDD not(BDD a) {
     return sylvan_not(a);
 }
 
-BDD and(BDD a, BDD b) {
+BDD and(int count, ...) {
     LACE_ME;
-    return sylvan_and(a, b);
+    //initialize starting BDD
+    BDD res = sylvan_true;
+    //Declare list of variable args
+    va_list ap;
+    //Start feeding args
+    va_start(ap, count);
+    int i;
+    for(i=0; i<count; i++)
+        //feed arguments and AND them to init BDD
+        res = sylvan_and(res, va_arg(ap, BDD));
+    //End feeding args
+    va_end(ap);
+    return res;
 }
+
 
 BDD is(BDD a, BDD b) {
     LACE_ME;
@@ -60,7 +74,7 @@ BDD is(BDD a, BDD b) {
 
 BDD next(BDD beginstate, BDD transition) {
     LACE_ME;
-    BDD nextstate_not_renamed = sylvan_compose(sylvan_exists(and(beginstate, transition), varset), reverse_varmap);
+    BDD nextstate_not_renamed = sylvan_compose(sylvan_exists(and(2, beginstate, transition), varset), reverse_varmap);
     return nextstate_not_renamed;
 }
 
@@ -78,40 +92,38 @@ int main()  {
     f = sylvan_ithvar(f_var);
     fp = sylvan_ithvar(fp_var);
 
-    //Mapping of the leave trace
-    // We say here that cp is the new version of the c_var variable
+    // We say here that we need to rename cp to c
     reverse_varmap = mtbdd_map_add(reverse_varmap, cp_var, c);
     reverse_varmap = mtbdd_map_add(reverse_varmap, wp_var, w);
     reverse_varmap = mtbdd_map_add(reverse_varmap, fp_var, f);
 
     //Set of all variables which needs to be renamed
-
     varset = sylvan_set_add(varset, c_var);
     varset = sylvan_set_add(varset, w_var);
     varset = sylvan_set_add(varset, f_var);
 
     //Initial state
-    BDD initial = and(not(c), and(w, not(f)));
+    BDD initial = and(3,not(c), w, not(f));
 
     //-------------Transitions---------------
 
     //Leave transition
-    BDD transleave = and(not(cp),and(is(w,wp),is(f,fp)));
+    BDD transleave = and(3, not(cp), is(w,wp), is(f,fp));
 
     //Enter transition
-    BDD transEnter = and(not(c), and(w, and(cp, and(not(wp), is(f, fp)))));    //TODO: Kan je een variable aantal args meegeven in een functie? Kan het met arrays?
+    BDD transEnter = and(5, not(c), w, cp, not(wp), is(f, fp));
 
     //Exit transition
-    BDD exit = and(c, and(not(cp), and(not(is(f, fp)), is(w,wp))));
+    BDD exit = and(4, c, not(cp), not(is(f, fp)), is(w,wp));
 
     //Restart transition
-    BDD restart = and(f, and(not(is(w, wp)), and(not(fp), is(c,cp))));
+    BDD restart = and(4, f, not(is(w, wp)), not(fp), is(c,cp));
 
     //--------------------------------------
 
     //BDD containing all states after the transition leave from the initial state
 
-    showBDD(next(initial,transEnter));
+    showBDD(next(initial,transleave));
 
 
 
