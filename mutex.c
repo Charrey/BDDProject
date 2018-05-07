@@ -40,7 +40,7 @@ void init_sylvan_lace() {
     // 0 = auto-detect  number  of  Lace  workers
     int n_workers = 0;
     //initialize Lace with a deque size of 4M
-    lace_init(n_workers, 40960000);
+    lace_init(n_workers, 4096000); //Ie
     lace_startup(0, NULL, NULL);
     LACE_ME;
 
@@ -140,8 +140,22 @@ BDD next(BDD beginstate, BDD transition) {
     return nextstate;
 }
 
-bool check(int count, BDD toCheck, ...) {
-  //TODO HANS (and all, then check if equals sylvan_false)
+bool check(int count, BDD bdd, ...) {
+    LACE_ME;
+    //initialize starting BDD
+    BDD res = sylvan_true;
+    //Declare list of variable args
+    va_list ap;
+    //Start feeding args
+    va_start(ap, count);
+    int i;
+    for(i=0; i<count; i++)
+        //feed arguments and AND them to init BDD
+        res = sylvan_and(res, va_arg(ap, BDD));
+    //End feeding args
+    res = sylvan_and(res, bdd);
+    va_end(ap);
+    return res == sylvan_true;
 }
 
 
@@ -166,7 +180,7 @@ int main()  {
 
     showBDD(transAny);
     char str[12];
-    sprintf(str, "%d", sylvan_nodecount(transAny));
+    sprintf(str, "test %d", (int) sylvan_nodecount(transAny));
 
     //if Sylvan is compiled with -DSYLVAN_STATS=ON,
     //then print statistics on stderr.
