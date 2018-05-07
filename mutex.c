@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+#define btoa(x) ((x)?"true":"fakse")
+
 uint32_t c_var = 200;
 uint32_t cp_var = 201;
 uint32_t w_var = 100;
@@ -40,7 +42,7 @@ void init_sylvan_lace() {
     // 0 = auto-detect  number  of  Lace  workers
     int n_workers = 0;
     //initialize Lace with a deque size of 4M
-    lace_init(n_workers, 4096000); //Ie
+    lace_init(n_workers, 1096000); //Ie
     lace_startup(0, NULL, NULL);
     LACE_ME;
 
@@ -176,11 +178,13 @@ int main()  {
         myBDD = next(myBDD, transAny);
     }
 
-    BDD check = and(4, myBDD, not(c), not(w), f);
+    BDD checkBDD = and(4, myBDD, not(c), not(w), f);
 
     showBDD(transAny);
     char str[12];
-    sprintf(str, "test %d", (int) sylvan_nodecount(transAny));
+    printf("Nodecount: %d" , (int) sylvan_nodecount(transAny));
+
+    printf("check: %c" , btoa(check(1, myBDD, myBDD) ));
 
     //if Sylvan is compiled with -DSYLVAN_STATS=ON,
     //then print statistics on stderr.
