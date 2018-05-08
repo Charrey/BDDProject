@@ -6,10 +6,10 @@
 
 #define btoa(x) ((x)?"true":"fakse")
 
-uint32_t c_var = 200;
-uint32_t cp_var = 201;
-uint32_t w_var = 100;
-uint32_t wp_var = 101;
+uint32_t c_var = 100;
+uint32_t cp_var = 101;
+uint32_t w_var = 200;
+uint32_t wp_var = 201;
 uint32_t f_var = 300;
 uint32_t fp_var = 301;
 
@@ -96,6 +96,11 @@ BDD is(BDD a, BDD b) {
     return sylvan_equiv(a, b);
 }
 
+char * checkToString(int b) {
+    return b==1? "True" : "False";
+    }
+
+
 void init_mutex() {
     LACE_ME;
     //All variables as BDDs
@@ -142,7 +147,7 @@ BDD next(BDD beginstate, BDD transition) {
     return nextstate;
 }
 
-bool check(int count, BDD bdd, ...) {
+int check(int count, BDD bdd, ...) {
     LACE_ME;
     //initialize starting BDD
     BDD res = sylvan_true;
@@ -157,7 +162,15 @@ bool check(int count, BDD bdd, ...) {
     //End feeding args
     res = sylvan_and(res, bdd);
     va_end(ap);
-    return res == sylvan_true;
+
+
+    res = sylvan_exists(res, varset);
+
+    if (res == sylvan_true) {
+        return 1; //True
+    } else if (res == sylvan_false) {
+        return 0; //False
+    }
 }
 
 
@@ -180,12 +193,12 @@ int main()  {
 
     BDD checkBDD = and(4, myBDD, not(c), not(w), f);
 
-    showBDD(transAny);
+
     char str[12];
     printf("Nodecount: %d" , (int) sylvan_nodecount(transAny));
-
-    printf("check: %c" , btoa(check(1, myBDD, myBDD) ));
-
+    printf("%s","\n");
+    printf("check: %s" , checkToString(check(3, myBDD, c, w, f)) );
+    showBDD(checkBDD);
     //if Sylvan is compiled with -DSYLVAN_STATS=ON,
     //then print statistics on stderr.
     sylvan_stats_report(stderr);
